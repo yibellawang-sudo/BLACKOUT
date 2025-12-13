@@ -1,0 +1,20 @@
+#node dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+#next's build output
+.next/
+out/
+
+#env variables
+.env.local
+.env.*.local
+
+#logs
+*.log
+
+#OS files
+.DS_Store
+Thumbs.db
