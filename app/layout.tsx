@@ -2,7 +2,6 @@ import type { ReactNode } from "react"
 
 export const metadata = {
   title: "BLACKOUT",
-  description: "Idea grid + constellations"
 }
 
 export default function RootLayout({
