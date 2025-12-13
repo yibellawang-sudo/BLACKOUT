@@ -37,6 +37,8 @@ export default function DashboardPage() {
       >
         Open Idea Modal
       </button>
+      
+      <button className="btn">Test Button</button>
 
       {showModal && (
         <IdeaModal
