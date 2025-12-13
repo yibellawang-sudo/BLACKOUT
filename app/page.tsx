@@ -23,6 +23,24 @@ export default function Home() {
     setLoading(false);
   };
 
+  const [pipelineOutput, setPipelineOutput] = useState<any>(null);
+  const [pipelineLoading, setPipelineLoading] = useState(false);
+
+  async function runTestPipeline() {
+    setPipelineLoading(true);
+    try {
+        const res = await fetch("/api/testPipeline", { method: "POST" });
+        const json = await res.json();
+        console.log("Pipeline output:", json);
+        setPipelineOutput(json);
+    } catch (err) {
+        console.error("Pipeline error:", err);
+        setPipelineOutput({ error: err });
+    } finally {
+        setPipelineLoading(false);
+    }
+}
+
   return (
     <main className="p-6 max-w-3xl mx-auto">
       <h1 className="text-3xl font-bold mb-4">Blackout</h1>
@@ -58,16 +76,22 @@ export default function Home() {
       <button
         onClick={submitIdea}
         disabled={loading || !meme}
-        className="bg-black text-white px-4 py-2 rounded disabled:opacity-50"
+        className="bg-black text-white px-4 py-2 rounded disabled:opacity-50 mr-2"
       >
         {loading ? "Submitting…" : "Submit Idea"}
       </button>
 
-      {response && (
-        <pre className="mt-6 bg-gray-100 p-3 rounded text-xs">
-          {JSON.stringify(response, null, 2)}
+      <button
+        onClick={runTestPipeline}
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Run Blackout Test Pipeline
+      </button>
+      {pipelineOutput && (
+        <pre className="mt-4 bg-gray-100 p-3 rounded text-xs">
+            {JSON.stringify(pipelineOutput, null, 2)}
         </pre>
-      )}
+    )}
     </main>
   );
 }
