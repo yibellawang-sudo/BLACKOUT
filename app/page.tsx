@@ -80,6 +80,8 @@ export default function Home() {
       >
         {loading ? "Submitting…" : "Submit Idea"}
       </button>
+      
+      <button className="btn">Test Button</button>
 
       <button
         onClick={runTestPipeline}
