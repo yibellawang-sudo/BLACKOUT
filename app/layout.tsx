@@ -1,17 +1,18 @@
-import type { ReactNode } from "react"
+import "./globals.css";
+import type { ReactNode } from "react";
 
 export const metadata = {
   title: "BLACKOUT",
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: ReactNode
+  children: ReactNode;
 }) {
   return (
     <html lang="en">
       <body>{children}</body>
     </html>
-  )
+  );
 }
