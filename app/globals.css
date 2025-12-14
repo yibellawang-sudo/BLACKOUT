@@ -297,3 +297,206 @@ body {
 .mt-8 {
   margin-top: 1.5rem;
 }
+
+/* Add to your globals.css */
+
+/* Modal styling from the dark blue theme */
+.btn-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 22px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  transform: rotate(90deg);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.modal-title {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+  color: rgb(248, 250, 252);
+}
+
+.modal-title::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-top: 16px;
+  border-radius: 2px;
+}
+
+.label-idea {
+  display: block;
+  margin-bottom: 10px;
+  margin-top: 28px;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.textarea-idea {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.4);
+  color: rgb(248, 250, 252);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.3s ease;
+}
+
+.textarea-idea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.textarea-idea:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.meme-grid {
+  margin-bottom: 32px;
+  margin-top: 14px;
+}
+
+.meme-select {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.4);
+  color: rgb(248, 250, 252);
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='rgba(255,255,255,0.5)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  padding-right: 45px;
+}
+
+.meme-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+.meme-select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(15, 23, 42, 0.6);
+}
+
+.meme-select option {
+  background: rgb(30, 41, 59);
+  color: rgb(248, 250, 252);
+  padding: 10px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 16px;
+  margin-top: 8px;
+  border-radius: 12px;
+  background: rgb(248, 250, 252);
+  border: none;
+  color: rgb(15, 23, 42);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15);
+  background: rgb(255, 255, 255);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.btn-submit:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.related-title {
+  font-size: 22px;
+  font-weight: 400;
+  color: rgb(248, 250, 252);
+  margin-bottom: 8px;
+  letter-spacing: -0.2px;
+}
+
+.related-title::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-top: 12px;
+  margin-bottom: 20px;
+  border-radius: 2px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.related-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 20px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.related-card:hover {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.related-card p {
+  color: rgba(248, 250, 252, 0.9);
+  line-height: 1.6;
+  margin: 0;
+  font-size: 14px;
+}
