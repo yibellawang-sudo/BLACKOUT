@@ -168,7 +168,7 @@ export default function IdeaModal({ onClose, onIdeaSubmitted }: IdeaModalProps) 
                 border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: '0.5rem',
                 color: '#a3a3a3',
-                cursor: 'pointe r'
+                cursor: 'pointer'
               }}
               onClick={() => {
                 setSubmitted(false);

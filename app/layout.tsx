@@ -1,9 +1,5 @@
-import "./globals.css";
 import type { ReactNode } from "react";
-
-export const metadata = {
-  title: "BLACKOUT",
-};
+import "./globals.css";
 
 export default function RootLayout({
   children,
