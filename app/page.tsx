@@ -6,8 +6,6 @@ import IdeaModal from "./components/IdeaModal";
 type View = "network" | "personal";
 import { MEMES } from "@/lib/memes";
 
-import Image from "next/image";
-
 const MEME_LOOKUP = MEMES.reduce((acc, meme) => {
   acc[meme.id] = meme;
   return acc;
@@ -128,12 +126,12 @@ export default function Home() {
       <img
         src="/cometDog.png"
         alt="Comet Dog Logo" 
-        width={280} 
-        height={280} 
         style={{ 
           position: 'fixed', 
           bottom: '0.5rem',
           left: '1rem',
+          width: '280px',
+          height: '280px',
           zIndex: 1000,
           transform: 'rotate(-15deg)',
           animation: 'float 4s ease-in-out infinite'
@@ -143,12 +141,13 @@ export default function Home() {
         @keyframes float {
           0%, 100% {
             transform: rotate(-15deg) translateY(5px);
+          }
+          50% {
+            transform: rotate(3deg) translateY(-20px);
+          }
         }
-        50% {
-          transform: rotate(3deg) translateY(-20px);
-        }
-      }
       `}</style>
+
       <div style={{ minHeight: "100vh", background: "rgb(2, 6, 23)", padding: "32px" }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
@@ -594,60 +593,5 @@ export default function Home() {
         )}
       </div>
     </>
-  );
-"use client"; 
-import { useState } from "react"; 
-import IdeaModal from "./components/IdeaModal"; 
-
-// Adjust the relative path as necessary based on where your TSX file is located
-import cometDogImage from "../../public/cometDog.png"; 
-
-export default function DashboardPage() { 
-  const [showModal, setShowModal] = useState(false); 
-  const handleIdeaSubmitted = (data: any) => { 
-    console.log("Idea submitted:", data); 
-    setShowModal(false); 
-  }; 
-  
-  return ( 
-    <div style={{ padding: "2rem" }}> 
-      {/* Added image tag using the imported variable */}
-      <img 
-        src={cometDogImage} 
-        alt="Comet Dog Logo" 
-        style={{ width: '150px', marginBottom: '1.5rem' }} 
-      />
-
-      <h1 style={{ color: "white", marginBottom: "1.5rem" }}>Dashboard</h1> 
-      
-      <button 
-        style={{ 
-          backgroundColor: '#001233', 
-          borderColor: 'white', 
-          borderStyle: 'solid', 
-          borderWidth: '1px', 
-          padding: '0.75rem 1.5rem', 
-          borderRadius: '5px', 
-          color: 'white', 
-          cursor: 'pointer', 
-          transition: 'all 200ms ease-out', 
-          fontSize: '1rem', 
-          fontFamily: 'inherit' 
-        }} 
-        onMouseEnter={(e) => { 
-          e.currentTarget.style.filter = 'drop-shadow(0 0 4px white)'; 
-        }} 
-        onMouseLeave={(e) => { 
-          e.currentTarget.style.filter = 'none'; 
-        }} 
-        onClick={() => setShowModal(true)} 
-      > 
-        Open Idea Modal 
-      </button> 
-      <button className="btn">Test Button</button> 
-      {showModal && ( 
-        <IdeaModal onClose={() => setShowModal(false)} onIdeaSubmitted={handleIdeaSubmitted} /> 
-      )} 
-    </div> 
   );
 }
