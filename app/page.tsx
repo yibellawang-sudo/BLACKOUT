@@ -37,6 +37,7 @@ export default function Home() {
     "Lets make your own star on the constellation - your first idea!",
     "Click here to start!",
   ];
+  const CLICK_BUTTON_MSG = "Click here to start!";
   const [dogMessageIndex, setDogMessageIndex] = useState(0);
   const [dogMessage, setDogMessage] = useState("");
   const [showDogLabel, setShowDogLabel] = useState(true);
@@ -144,7 +145,16 @@ export default function Home() {
         </h1>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true);
+            
+            if (dogMessage === CLICK_BUTTON_MSG){
+              setDogMessage("");
+            }
+            if (highlightKey === "addIdea") {
+              setHighlightKey(null);
+            }
+          }}
           style={{
             padding: "14px 28px",
             borderRadius: 12,
