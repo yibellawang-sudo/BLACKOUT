@@ -28,6 +28,14 @@ export default function Home() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
+  const DOG_MESSAGES = [
+    "Oh hey, you! Didn’t see you there.",
+    "Welcome to The Blackout! You might be wondering why it’s so dark and boring here, huh?",
+    "Well no need to worry — that’s why I’m here to lead you to a light.",
+    "A light you can create with just a little bit of thinkin’!",
+  ];
+  const [dogMessageIndex, setDogMessageIndex] = useState(0);
+  const [dogMessage, setDogMessage] = useState("");
 
   useEffect(() => {
     fetchIdeas();
@@ -284,7 +292,20 @@ export default function Home() {
 
       <img
       src="/cometDog.png"
-      alt="OG Dog"
+      alt="comet dog"
+      onClick={()  => {
+        if (dogMessageIndex === DOG_MESSAGES.length) {
+          setDogMessage("");
+          setDogMessageIndex((prev) => prev + 1);
+          return;
+        }
+        
+        if (dogMessageIndex >= DOG_MESSAGES.length) return;
+
+        setDogMessage(DOG_MESSAGES[dogMessageIndex]);
+        setDogMessageIndex((prev) => prev + 1);
+        }}
+        
       style={{
         position: "absolute",
         bottom: 20,
@@ -294,6 +315,24 @@ export default function Home() {
         zIndex: 50,
       }}
       />
+
+      {dogMessage && (
+        <div
+          style={{
+            position: "absolute",
+            bottom:100,
+            left:180,
+            background: "rgba(0,0,0,0.6)",
+            padding: "12px 16px",
+            borderRadius: 10,
+            color: "white",
+            fontSize: "1rem",
+            zIndex: 50,
+          }}
+        >
+          {dogMessage}
+        </div>
+      )}
 
     </div>
   );
