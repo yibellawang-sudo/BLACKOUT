@@ -33,10 +33,14 @@ export default function Home() {
     "Welcome to The Blackout! You might be wondering why it’s so dark and boring here, huh?",
     "Well no need to worry — that’s why I’m here to lead you to a light.",
     "A light you can create with just a little bit of thinkin’!",
+    "Others also seem to be struggling with navigating through this dark realm but with your help, you can create ‘Constell-ideations’ (a constellation of ideas)! That way you and the new friends you meet can share each other's ideas through visuals like sticky notes and newer memes etc!",
+    "Lets make your own star on the constellation - your first idea!",
+    "Click here to start!",
   ];
   const [dogMessageIndex, setDogMessageIndex] = useState(0);
   const [dogMessage, setDogMessage] = useState("");
   const [showDogLabel, setShowDogLabel] = useState(true);
+  const [highlightKey, setHighlightKey] = useState<string | null>(null);
 
   useEffect(() => {
     fetchIdeas();
@@ -150,7 +154,14 @@ export default function Home() {
             cursor: "pointer",
             fontWeight: 700,
             fontSize: "0.95rem",
-            boxShadow: "0 4px 20px rgba(96, 165, 250, 0.4), 0 2px 10px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+            boxShadow: `
+              0 4px 20px rgba(96, 165, 250, 0.4),
+              0 2px 10px rgba(251, 191, 36, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8)
+              ${highlightKey === "addIdea"
+                ? ", 0 0 0 3px rgba(251, 191, 36, 0.9), 0 0 30px rgba(251, 191, 36, 0.8)"
+                : ""}
+            `,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
           onMouseEnter={(e) => {
@@ -329,10 +340,16 @@ export default function Home() {
 
           if (dogMessageIndex >= DOG_MESSAGES.length) {
             setDogMessage("");
+            setHighlightKey(null);
             return;
           }
 
           setDogMessage(DOG_MESSAGES[dogMessageIndex]);
+          
+          if (dogMessageIndex === DOG_MESSAGES.length - 1){
+            setHighlightKey("addIdea")
+          }
+
           setDogMessageIndex((prev) => prev + 1);
         }}
         style={{
