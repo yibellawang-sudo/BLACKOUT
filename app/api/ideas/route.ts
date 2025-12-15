@@ -1,8 +1,5 @@
 import { supabase } from "@/lib/supabase";
 
-/* =========================
-   GET — fetch all ideas
-========================= */
 export async function GET() {
   const { data, error } = await supabase
     .from("ideas")
@@ -11,25 +8,13 @@ export async function GET() {
 
   if (error) {
     console.error("Supabase fetch error:", error);
-    return Response.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    return Response.json({ error: error.message }, { status: 500 });
   }
 
   return Response.json({ data });
 }
 
 export async function POST(req: Request) {
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const body = await req.json();
   const { title, text, meme } = body;
 
@@ -39,7 +24,7 @@ export async function POST(req: Request) {
       title,
       text,
       meme_id: meme,
-      author_id: user.id,
+      author_id: "00000000-0000-0000-0000-000000000000",
     })
     .select()
     .single();

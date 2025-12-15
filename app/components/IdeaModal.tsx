@@ -28,23 +28,32 @@ export default function IdeaModal({ onClose, onIdeaSubmitted, idea }: IdeaModalP
   const selectedMeme = MEMES.find((m) => m.id === meme);
 
   const handleSubmit = async () => {
-    if (!title || !text || !meme) return;
+    if (!title || !text || !meme) {
+      alert("Please fill in all fields");
+      return;
+    }
 
     try {
       const res = await fetch("/api/ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, text, meme_id: meme }),
+        body: JSON.stringify({ title, text, meme }),
       });
 
       const json = await res.json();
 
       if (json?.data) {
-        onIdeaSubmitted({ title, text, meme });
         setSubmitted(true);
+        setTimeout(() => {
+          onIdeaSubmitted({ title, text, meme });
+          onClose();
+        }, 1500);
+      } else {
+        alert("Error: " + (json.error || "Unknown error"));
       }
     } catch (err) {
       console.error("Failed to submit idea:", err);
+      alert("Network error: " + err);
     }
   };
 
@@ -238,6 +247,7 @@ export default function IdeaModal({ onClose, onIdeaSubmitted, idea }: IdeaModalP
                       height: "auto",
                       borderRadius: "0.5rem",
                       display: "block",
+                      margin: "0 auto",
                     }}
                   />
                 </div>
@@ -252,12 +262,12 @@ export default function IdeaModal({ onClose, onIdeaSubmitted, idea }: IdeaModalP
                 border: "1px solid rgba(252, 211, 77, 0.3)",
                 borderRadius: "0.5rem",
                 color: "#fff",
-                cursor: !text || !meme ? "not-allowed" : "pointer",
-                opacity: !text || !meme ? 0.4 : 1,
+                cursor: !title || !text || !meme ? "not-allowed" : "pointer",
+                opacity: !title || !text || !meme ? 0.4 : 1,
                 fontFamily: "'Ningrat', sans-serif",
               }}
               onClick={handleSubmit}
-              disabled={!text || !meme}
+              disabled={!title || !text || !meme}
             >
               Save Idea
             </button>
@@ -274,28 +284,8 @@ export default function IdeaModal({ onClose, onIdeaSubmitted, idea }: IdeaModalP
               Idea Submitted
             </h3>
             <p style={{ color: "#737373", marginBottom: "1.5rem" }}>
-              Your idea has been added to the power grid.
+              Your idea has been added to the constellation.
             </p>
-            <button
-              style={{
-                width: "100%",
-                padding: "0.75rem",
-                backgroundColor: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "0.5rem",
-                color: "#a3a3a3",
-                cursor: "pointer",
-                fontFamily: "'Ningrat', sans-serif",
-              }}
-              onClick={() => {
-                setSubmitted(false);
-                setTitle("");
-                setText("");
-                setMeme("");
-              }}
-            >
-              Submit Another
-            </button>
           </div>
         )}
       </div>
