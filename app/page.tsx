@@ -52,6 +52,7 @@ export default function Home() {
   }
 
   return (
+    
     <div
       style={{
         margin: 0,
@@ -280,6 +281,20 @@ export default function Home() {
           }
         `}
       </style>
+
+      <img
+      src="/cometDog.png"
+      alt="OG Dog"
+      style={{
+        position: "absolute",
+        bottom: 20,
+        left: 20,
+        width: 180,
+        height: 180,
+        zIndex: 50,
+      }}
+      />
+
     </div>
   );
 }
