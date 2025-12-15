@@ -36,6 +36,7 @@ export default function Home() {
   ];
   const [dogMessageIndex, setDogMessageIndex] = useState(0);
   const [dogMessage, setDogMessage] = useState("");
+  const [showDogLabel, setShowDogLabel] = useState(true);
 
   useEffect(() => {
     fetchIdeas();
@@ -289,51 +290,79 @@ export default function Home() {
           }
         `}
       </style>
-
-      <img
-      src="/cometDog.png"
-      alt="comet dog"
-      onClick={()  => {
-        if (dogMessageIndex === DOG_MESSAGES.length) {
-          setDogMessage("");
-          setDogMessageIndex((prev) => prev + 1);
-          return;
-        }
-        
-        if (dogMessageIndex >= DOG_MESSAGES.length) return;
-
-        setDogMessage(DOG_MESSAGES[dogMessageIndex]);
-        setDogMessageIndex((prev) => prev + 1);
-        }}
-        
+      <div
       style={{
         position: "absolute",
         bottom: 20,
         left: 20,
-        width: 180,
-        height: 180,
         zIndex: 50,
       }}
-      />
-
-      {dogMessage && (
+    >
+      {showDogLabel && (
         <div
           style={{
             position: "absolute",
-            bottom:100,
-            left:180,
-            background: "rgba(0,0,0,0.6)",
-            padding: "12px 16px",
-            borderRadius: 10,
+            top: -18,
+            left: 0,
+            right: 0,
+            margin: "0 auto",
+            width: "fit-content",
+            background: "rgba(0,0,0,0.7)",
             color: "white",
-            fontSize: "1rem",
-            zIndex: 50,
+            padding: "6px 10px",
+            borderRadius: 999,
+            fontSize: 12,
+            fontWeight: 600,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
           }}
         >
-          {dogMessage}
+          click to talk to me!
         </div>
       )}
 
+      <img
+        src="/cometDog.png"
+        alt="comet dog"
+        onClick={() => {
+          setShowDogLabel(false);
+
+          if (dogMessageIndex >= DOG_MESSAGES.length) {
+            setDogMessage("");
+            return;
+          }
+
+          setDogMessage(DOG_MESSAGES[dogMessageIndex]);
+          setDogMessageIndex((prev) => prev + 1);
+        }}
+        style={{
+          width: 180,
+          height: 180,
+          cursor: "pointer",
+        }}
+      />
     </div>
+
+    {dogMessage && (
+      <div
+        style={{
+          position: "absolute",
+          bottom: 100,
+          left: 180,
+          background: "rgba(0,0,0,0.6)",
+          padding: "12px 16px",
+          borderRadius: 10,
+          color: "white",
+          fontSize: "1rem",
+          zIndex: 50,
+          maxWidth: 320,
+        }}
+      >
+        {dogMessage}
+      </div>
+    )}
+
+
+        </div>
   );
 }
