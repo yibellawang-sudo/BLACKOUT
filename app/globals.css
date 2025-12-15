@@ -1,4 +1,18 @@
-/* Reset and Base Styles */
+@font-face {
+  font-family: 'Chopsic';
+  src: url('/fonts/chopsic-font/Chopsic-K6Dp.ttf');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ningrat';
+  src: url('/fonts/ningrat-font/NingratRegular-OVoOO.otf');
+  font-weight: 700;
+  font-style: normal;
+}
+
+
 * {
   margin: 0;
   padding: 0;

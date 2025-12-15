@@ -1,597 +1,285 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import IdeaModal from "./components/IdeaModal";
-
-type View = "network" | "personal";
 import { MEMES } from "@/lib/memes";
 
-const MEME_LOOKUP = MEMES.reduce((acc, meme) => {
-  acc[meme.id] = meme;
-  return acc;
-}, {} as Record<string, { id: string; label: string; image: string }>);
+type Idea = {
+  id: string;
+  title: string;
+  text: string;
+  meme_id: string;
+  created_at?: string;
+};
+
+const MEME_LOOKUP = Object.fromEntries(MEMES.map((m) => [m.id, m]));
+
+function normalizeIdea(raw: any): Idea {
+  return {
+    id: raw.id,
+    title: raw.title ?? raw.text?.substring(0, 50) ?? "Untitled",
+    text: raw.text ?? "",
+    meme_id: raw.meme_id,
+    created_at: raw.created_at,
+  };
+}
 
 export default function Home() {
-  const [view, setView] = useState<View>("network");
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [networkIdeas, setNetworkIdeas] = useState<any[]>([]);
-  const [personalIdeas, setPersonalIdeas] = useState<any[]>([]);
-  const [selectedIdea, setSelectedIdea] = useState<any>(null);
-  const [editText, setEditText] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
 
-  // Fetch all ideas for network view
   useEffect(() => {
-    if (view === "network") {
-      fetchNetworkIdeas();
-    }
-  }, [view]);
+    fetchIdeas();
+  }, []);
 
-  // Fetch user's ideas
-  useEffect(() => {
-    if (view === "personal") {
-      fetchPersonalIdeas();
-    }
-  }, [view]);
-
-  async function fetchNetworkIdeas() {
-    try {
-      const res = await fetch("/api/ideas");
-      const data = await res.json();
-      setNetworkIdeas(data.data || []);
-    } catch (err) {
-      console.error("Failed to fetch network ideas:", err);
-    }
+  async function fetchIdeas() {
+    const res = await fetch("/api/ideas");
+    const json = await res.json();
+    setIdeas((json.data ?? []).map(normalizeIdea));
   }
 
-  async function fetchPersonalIdeas() {
-    try {
-      const res = await fetch("/api/ideas/personal");
-      const data = await res.json();
-      setPersonalIdeas(data.data || []);
-    } catch (err) {
-      console.error("Failed to fetch personal ideas:", err);
-    }
-  }
+  function handleIdeaSubmitted(raw: { text: string; meme: string; title: string }) {
+    const idea = normalizeIdea({
+      id: crypto.randomUUID(),
+      title: raw.title,
+      text: raw.text,
+      meme_id: raw.meme,
+    });
 
-  function handleIdeaSubmitted(data: any) {
-    if (data?.data) {
-      setPersonalIdeas((prev) => [data.data, ...prev]);
-      if (view === "network") {
-        setNetworkIdeas((prev) => [data.data, ...prev]);
-      }
-    }
+    setIdeas((prev) => [idea, ...prev]);
     setShowModal(false);
   }
 
-  function openDetail(idea: any) {
-    setSelectedIdea(idea);
-    setEditText(idea.text);
-    setIsEditing(false);
-  }
-
-  function closeDetail() {
-    setSelectedIdea(null);
-    setIsEditing(false);
-  }
-
-  function startEdit() {
-    setIsEditing(true);
-  }
-
-  function cancelEdit() {
-    setIsEditing(false);
-    setEditText(selectedIdea.text);
-  }
-
-  async function saveEdit() {
-    try {
-      const res = await fetch(`/api/ideas/${selectedIdea.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: editText }),
-      });
-
-      const data = await res.json();
-      if (data.data) {
-        setPersonalIdeas((prev) =>
-          prev.map((idea) => (idea.id === selectedIdea.id ? data.data : idea))
-        );
-        setSelectedIdea(data.data);
-      }
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Failed to update idea:", err);
-    }
-  }
-
-  async function deleteIdea() {
-    if (!confirm("Delete this idea?")) return;
-
-    try {
-      await fetch(`/api/ideas/${selectedIdea.id}`, { method: "DELETE" });
-      setPersonalIdeas((prev) => prev.filter((idea) => idea.id !== selectedIdea.id));
-      closeDetail();
-    } catch (err) {
-      console.error("Failed to delete idea:", err);
-    }
-  }
-
-  const currentIdeas = view === "network" ? networkIdeas : personalIdeas;
-  const isPersonalView = view === "personal";
-
   return (
-    <>
-      {/* Image tag */}
-      <img
-        src="/cometDog.png"
-        alt="Comet Dog Logo" 
-        style={{ 
-          position: 'fixed', 
-          bottom: '0.5rem',
-          left: '1rem',
-          width: '280px',
-          height: '280px',
-          zIndex: 1000,
-          transform: 'rotate(-15deg)',
-          animation: 'float 4s ease-in-out infinite'
-        }} 
+    <div
+      style={{
+        margin: 0,
+        height: "100vh",
+        background: "#0a1628",
+        color: "white",
+        overflow: "hidden",
+        position: "relative",
+        fontFamily: "'Ningrat',sans-serif",
+      }}
+    >
+      {/* light effects */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(circle at 25% 25%, rgba(96, 165, 250, 0.25) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(251, 191, 36, 0.2) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 60%)",
+          pointerEvents: "none",
+        }}
       />
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% {
-            transform: rotate(-15deg) translateY(5px);
-          }
-          50% {
-            transform: rotate(3deg) translateY(-20px);
-          }
-        }
-      `}</style>
 
-      <div style={{ minHeight: "100vh", background: "rgb(2, 6, 23)", padding: "32px" }}>
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
-          <h1 style={{ fontSize: "32px", fontWeight: "300", color: "rgb(248, 250, 252)", letterSpacing: "-0.5px", margin: 0 }}>
-            Blackout
-          </h1>
+      {/* Light shimmer effect */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          background: "repeating-linear-gradient(90deg, transparent, transparent 150px, rgba(255, 255, 255, 0.02) 150px, rgba(255, 255, 255, 0.02) 152px)",
+          pointerEvents: "none",
+        }}
+      />
 
-          <button 
-            onClick={() => setShowModal(true)}
-            style={{
-              padding: "12px 24px",
-              background: "rgb(248, 250, 252)",
-              color: "rgb(15, 23, 42)",
-              borderRadius: "12px",
-              fontWeight: "600",
-              fontSize: "14px",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 0.3s ease"
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.background = "rgb(255, 255, 255)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.background = "rgb(248, 250, 252)";
-            }}
-          >
-            + Add Idea
-          </button>
-        </div>
+      {/* Subtle dot pattern */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `radial-gradient(circle, rgba(96, 165, 250, 0.15) 1px, transparent 1px)`,
+          backgroundSize: "50px 50px",
+          opacity: 0.4,
+          pointerEvents: "none",
+        }}
+      />
 
-        {/* View Toggle */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "32px", padding: "6px", background: "rgba(30, 41, 59, 0.5)", borderRadius: "12px", width: "fit-content" }}>
-          <button
-            style={{
-              padding: "10px 24px",
-              border: "none",
-              borderRadius: "8px",
-              background: view === "network" ? "rgb(248, 250, 252)" : "transparent",
-              color: view === "network" ? "rgb(15, 23, 42)" : "rgba(148, 163, 184, 1)",
-              fontWeight: "500",
-              fontSize: "14px",
-              cursor: "pointer",
-              transition: "all 0.3s ease"
-            }}
-            onClick={() => setView("network")}
-          >
-            Network
-          </button>
-          <button
-            style={{
-              padding: "10px 24px",
-              border: "none",
-              borderRadius: "8px",
-              background: view === "personal" ? "rgb(248, 250, 252)" : "transparent",
-              color: view === "personal" ? "rgb(15, 23, 42)" : "rgba(148, 163, 184, 1)",
-              fontWeight: "500",
-              fontSize: "14px",
-              cursor: "pointer",
-              transition: "all 0.3s ease"
-            }}
-            onClick={() => setView("personal")}
-          >
-            My Ideas
-          </button>
-        </div>
+      {/* Header */}
+      <header
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          padding: "32px 40px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          zIndex: 10,
+          backdropFilter: "blur(20px) brightness(1.2)",
+          background: "linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02))",
+          borderBottom: "1px solid rgba(96, 165, 250, 0.2)",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "2.5rem",
+            fontWeight: 800,
+            background: "linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #fbbf24 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+            margin: 0,
+            letterSpacing: "-0.02em",
+            filter: "drop-shadow(0 0 20px rgba(147, 197, 253, 0.5))",
+            fontFamily: "'Chopsic', sans-serif",
+          }}
+        >
+          Blackout
+        </h1>
 
-        {/* Ideas Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-          {currentIdeas.map((idea) => {
-            const meme = MEME_LOOKUP[idea.meme_id];
-            const title = idea.text.substring(0, 50) + (idea.text.length > 50 ? "..." : "");
+        <button
+          onClick={() => setShowModal(true)}
+          style={{
+            padding: "14px 28px",
+            borderRadius: 12,
+            background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(191, 219, 254, 0.9))",
+            color: "#0c1e3a",
+            border: "1px solid rgba(255, 255, 255, 0.3)",
+            cursor: "pointer",
+            fontWeight: 700,
+            fontSize: "0.95rem",
+            boxShadow: "0 4px 20px rgba(96, 165, 250, 0.4), 0 2px 10px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-2px) scale(1.05)";
+            e.currentTarget.style.boxShadow = "0 8px 30px rgba(96, 165, 250, 0.6), 0 4px 15px rgba(251, 191, 36, 0.3), inset 0 1px 0 rgba(255, 255, 255, 1)";
+            e.currentTarget.style.background = "linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(224, 242, 254, 0.95))";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0) scale(1)";
+            e.currentTarget.style.boxShadow = "0 4px 20px rgba(96, 165, 250, 0.4), 0 2px 10px rgba(251, 191, 36, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)";
+            e.currentTarget.style.background = "linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(191, 219, 254, 0.9))";
+          }}
+        >
+          + Add Idea
+        </button>
+      </header>
 
-            return (
-              <div
-                key={idea.id}
-                onClick={() => openDetail(idea)}
-                style={{
-                  cursor: "pointer",
-                  background: "rgb(30, 41, 59)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  transition: "all 0.3s ease"
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.15)";
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 12px 24px rgba(0, 0, 0, 0.3)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {/* Meme Image */}
-                <div style={{ position: "relative", height: "160px", overflow: "hidden", background: "rgb(51, 65, 85)" }}>
-                  {meme && (
-                    <img
-                      src={meme.image}
-                      alt={meme.label}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        opacity: "0.75",
-                        transition: "all 0.3s ease"
-                      }}
-                    />
-                  )}
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    background: "linear-gradient(to top, rgb(30, 41, 59), rgba(30, 41, 59, 0.2), transparent)"
-                  }}></div>
-                </div>
+      {/* Ideas constellation */}
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          paddingTop: "120px",
+        }}
+      >
+        {ideas.map((idea, index) => {
+          const x = 10 + (Math.random() * 80);
+          const y = 10 + (Math.random() * 70);
+          const size = 18 + Math.random() * 20;
+          
+          const isGold = Math.random() > 0.65;
+          const glowColor = isGold 
+            ? `rgba(251, 191, 36, 0.9)` 
+            : `rgba(147, 197, 253, 0.9)`;
+          const delay = index * 0.1;
 
-                {/* Card Content */}
-                <div style={{ padding: "16px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", marginBottom: "8px" }}>
-                    <span style={{
-                      fontSize: "10px",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                      color: "rgba(148, 163, 184, 1)",
-                      fontWeight: "500"
-                    }}>
-                      {meme?.label || idea.meme_id}
-                    </span>
-                    {view === "network" && idea.author_email && (
-                      <span style={{ fontSize: "10px", color: "rgba(100, 116, 139, 1)" }}>
-                        {idea.author_email.split("@")[0]}
-                      </span>
-                    )}
-                  </div>
-
-                  <p style={{
-                    color: "rgba(226, 232, 240, 1)",
-                    fontSize: "14px",
-                    lineHeight: "1.6",
-                    margin: 0,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden"
-                  }}>
-                    {title}
-                  </p>
-
-                  {idea.created_at && (
-                    <div style={{ marginTop: "12px", fontSize: "10px", color: "rgba(100, 116, 139, 1)" }}>
-                      {new Date(idea.created_at).toLocaleDateString()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Empty State */}
-        {currentIdeas.length === 0 && (
-          <div style={{ textAlign: "center", paddingTop: "80px", paddingBottom: "80px" }}>
-            <p style={{ color: "rgba(148, 163, 184, 1)", fontSize: "14px" }}>
-              {view === "network"
-                ? "No ideas in the network yet. Be the first!"
-                : "You haven't added any ideas yet."}
-            </p>
-          </div>
-        )}
-
-        {/* Detail Modal */}
-        {selectedIdea && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(15, 23, 42, 0.92)",
-              backdropFilter: "blur(12px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 50,
-              padding: "16px"
-            }}
-            onClick={closeDetail}
-          >
+          return (
             <div
+              key={idea.id}
+              onClick={() => setSelectedIdea(idea)}
               style={{
-                background: "rgb(30, 41, 59)",
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                borderRadius: "24px",
-                maxWidth: "672px",
-                width: "100%",
-                maxHeight: "90vh",
-                overflowY: "auto",
-                boxShadow: "0 24px 48px rgba(0, 0, 0, 0.4)"
+                position: "absolute",
+                left: `${x}%`,
+                top: `${y}%`,
+                width: size,
+                height: size,
+                background: isGold
+                  ? `radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(251, 191, 36, 0.9) 30%, rgba(245, 158, 11, 0.6) 100%)`
+                  : `radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(147, 197, 253, 0.9) 30%, rgba(96, 165, 250, 0.6) 100%)`,
+                borderRadius: "50%",
+                boxShadow: isGold
+                  ? `0 0 30px ${glowColor}, 0 0 60px ${glowColor}, 0 0 90px rgba(251, 191, 36, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.8)`
+                  : `0 0 30px ${glowColor}, 0 0 60px ${glowColor}, 0 0 90px rgba(96, 165, 250, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.9)`,
+                cursor: "pointer",
+                transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                animation: `float ${3 + Math.random() * 2}s ease-in-out infinite`,
+                animationDelay: `${delay}s`,
+                opacity: 0,
+                transform: "scale(0)",
+                border: "1px solid rgba(255, 255, 255, 0.3)",
               }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Meme Header */}
-              <div style={{ position: "relative", height: "256px", overflow: "hidden", background: "rgb(51, 65, 85)" }}>
-                {MEME_LOOKUP[selectedIdea.meme_id] && (
-                  <img
-                    src={MEME_LOOKUP[selectedIdea.meme_id].image}
-                    alt={MEME_LOOKUP[selectedIdea.meme_id].label}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", opacity: "0.8" }}
-                  />
-                )}
-                <div style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "linear-gradient(to top, rgb(30, 41, 59), rgba(30, 41, 59, 0.5), transparent)"
-                }}></div>
-                
-                {/* Close Button */}
-                <button
-                  onClick={closeDetail}
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    right: "16px",
-                    width: "40px",
-                    height: "40px",
-                    background: "rgba(30, 41, 59, 0.8)",
-                    backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "50%",
-                    color: "rgba(163, 163, 163, 1)",
-                    fontSize: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    transition: "all 0.3s ease"
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = "rgba(51, 65, 85, 1)";
-                    e.currentTarget.style.color = "rgba(226, 232, 240, 1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = "rgba(30, 41, 59, 0.8)";
-                    e.currentTarget.style.color = "rgba(163, 163, 163, 1)";
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-
-              {/* Content */}
-              <div style={{ padding: "32px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                  <span style={{
-                    fontSize: "12px",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    color: "rgba(148, 163, 184, 1)",
-                    fontWeight: "500"
-                  }}>
-                    {MEME_LOOKUP[selectedIdea.meme_id]?.label || selectedIdea.meme_id}
-                  </span>
-                  {view === "network" && selectedIdea.author_email && (
-                    <span style={{ fontSize: "12px", color: "rgba(100, 116, 139, 1)" }}>
-                      by {selectedIdea.author_email}
-                    </span>
-                  )}
-                </div>
-
-                {isEditing ? (
-                  <textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: "16px",
-                      background: "rgba(15, 23, 42, 0.5)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "12px",
-                      color: "rgba(226, 232, 240, 1)",
-                      fontSize: "14px",
-                      lineHeight: "1.6",
-                      resize: "none",
-                      minHeight: "128px",
-                      fontFamily: "inherit"
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <p style={{
-                    color: "rgba(226, 232, 240, 1)",
-                    fontSize: "16px",
-                    lineHeight: "1.6",
-                    marginBottom: "24px"
-                  }}>
-                    {selectedIdea.text}
-                  </p>
-                )}
-
-                {selectedIdea.created_at && (
-                  <div style={{
-                    fontSize: "12px",
-                    color: "rgba(100, 116, 139, 1)",
-                    marginBottom: "24px"
-                  }}>
-                    Created {new Date(selectedIdea.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric"
-                    })}
-                  </div>
-                )}
-
-                {/* Actions */}
-                {isPersonalView && (
-                  <div style={{ display: "flex", gap: "12px" }}>
-                    {isEditing ? (
-                      <>
-                        <button
-                          onClick={saveEdit}
-                          style={{
-                            flex: 1,
-                            padding: "12px 16px",
-                            background: "rgb(248, 250, 252)",
-                            color: "rgb(15, 23, 42)",
-                            borderRadius: "12px",
-                            fontWeight: "600",
-                            fontSize: "14px",
-                            border: "none",
-                            cursor: "pointer",
-                            transition: "all 0.3s ease"
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "rgb(255, 255, 255)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "rgb(248, 250, 252)";
-                          }}
-                        >
-                          Save Changes
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          style={{
-                            padding: "12px 16px",
-                            background: "rgb(51, 65, 85)",
-                            border: "1px solid rgba(255, 255, 255, 0.1)",
-                            color: "rgba(203, 213, 225, 1)",
-                            borderRadius: "12px",
-                            fontWeight: "500",
-                            fontSize: "14px",
-                            cursor: "pointer",
-                            transition: "all 0.3s ease"
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={startEdit}
-                          style={{
-                            flex: 1,
-                            padding: "12px 16px",
-                            background: "rgb(51, 65, 85)",
-                            border: "1px solid rgba(255, 255, 255, 0.1)",
-                            color: "rgba(226, 232, 240, 1)",
-                            borderRadius: "12px",
-                            fontWeight: "500",
-                            fontSize: "14px",
-                            cursor: "pointer",
-                            transition: "all 0.3s ease"
-                          }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={deleteIdea}
-                          style={{
-                            padding: "12px 16px",
-                            background: "rgb(51, 65, 85)",
-                            border: "1px solid rgba(159, 18, 57, 0.5)",
-                            color: "rgba(251, 113, 133, 1)",
-                            borderRadius: "12px",
-                            fontWeight: "500",
-                            fontSize: "14px",
-                            cursor: "pointer",
-                            transition: "all 0.3s ease"
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = "rgba(76, 5, 25, 0.5)";
-                            e.currentTarget.style.borderColor = "rgba(159, 18, 57, 0.8)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = "rgb(51, 65, 85)";
-                            e.currentTarget.style.borderColor = "rgba(159, 18, 57, 0.5)";
-                          }}
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add Idea Modal */}
-        {showModal && (
-          <div style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(15, 23, 42, 0.92)",
-            backdropFilter: "blur(12px)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 50
-          }}>
-            <div style={{
-              position: "relative",
-              background: "rgb(30, 41, 59)",
-              padding: "48px",
-              borderRadius: "24px",
-              maxWidth: "780px",
-              width: "90%",
-              maxHeight: "90vh",
-              overflowY: "auto",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-              boxShadow: "0 24px 48px rgba(0, 0, 0, 0.4)"
-            }}>
-              <IdeaModal
-                onClose={() => setShowModal(false)}
-                onIdeaSubmitted={handleIdeaSubmitted}
-              />
-            </div>
-          </div>
-        )}
+              ref={(el) => {
+                if (el) {
+                  setTimeout(() => {
+                    el.style.opacity = "1";
+                    el.style.transform = "scale(1)";
+                  }, delay * 100);
+                }
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.8)";
+                e.currentTarget.style.boxShadow = isGold
+                  ? `0 0 40px ${glowColor}, 0 0 80px ${glowColor}, 0 0 120px rgba(251, 191, 36, 0.5), inset 0 0 25px rgba(255, 255, 255, 1)`
+                  : `0 0 40px ${glowColor}, 0 0 80px ${glowColor}, 0 0 120px rgba(96, 165, 250, 0.5), inset 0 0 25px rgba(255, 255, 255, 1)`;
+                e.currentTarget.style.zIndex = "5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = isGold
+                  ? `0 0 30px ${glowColor}, 0 0 60px ${glowColor}, 0 0 90px rgba(251, 191, 36, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.8)`
+                  : `0 0 30px ${glowColor}, 0 0 60px ${glowColor}, 0 0 90px rgba(96, 165, 250, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.9)`;
+                e.currentTarget.style.zIndex = "1";
+              }}
+            />
+          );
+        })}
       </div>
-    </>
+
+      {/* Empty state */}
+      {ideas.length === 0 && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "16px",
+          }}
+        >
+          <p
+            style={{
+              fontSize: "1.2rem",
+              color: "rgba(191, 219, 254, 0.7)",
+              margin: 0,
+              fontWeight: 500,
+            }}
+          >
+            Your constell-ideation awaits
+          </p>
+        </div>
+      )}
+
+      {/* Modals */}
+      {showModal && (
+        <IdeaModal onClose={() => setShowModal(false)} onIdeaSubmitted={handleIdeaSubmitted} />
+      )}
+
+      {selectedIdea && (
+        <IdeaModal
+          idea={selectedIdea}
+          onClose={() => setSelectedIdea(null)}
+          onIdeaSubmitted={handleIdeaSubmitted}
+        />
+      )}
+
+      <style>
+        {`
+          @keyframes float {
+            0%, 100% {
+              transform: translateY(0px);
+            }
+            50% {
+              transform: translateY(-12px);
+            }
+          }
+        `}
+      </style>
+    </div>
   );
 }
